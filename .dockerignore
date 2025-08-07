@@ -41,8 +41,6 @@ test
 # Development files
 .eslintrc.js
 .prettierrc
-tsconfig.json
-tsconfig.build.json
 
 # Logs
 logs
