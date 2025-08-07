@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather-Based Marketing Automation - Bence Portfolio</title>
+    <meta name="description" content="Intelligent content generation system that monitors weather warnings and automatically creates targeted social media content with water-saving tips and regional alerts">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="../index.html">Bence</a>
+                </div>
+                <nav class="nav">
+                    <ul>
+                        <li><a href="../index.html">Home</a></li>
+                        <li><a href="../index.html#portfolio">Portfolio</a></li>
+                        <li><a href="../about.html">About</a></li>
+                        <li><a href="../about.html#contact">Contact</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <a href="../index.html" class="back-button">
+                <span>←</span> Back to Projects
+            </a>
+
+            <article class="project-header">
+                <h1>Weather-Based Marketing Automation</h1>
+                <p class="project-intro">
+                    An intelligent marketing automation system that monitors Met Office weather warnings and automatically generates 
+                    targeted social media content. The system specializes in creating water conservation messaging during heat waves, 
+                    combining real-time weather data with contextual water-saving tips and regional alerts. Features sophisticated 
+                    content generation, duplicate prevention, and multi-platform distribution capabilities.
+                </p>
+            </article>
+
+            <section class="project-screenshot">
+                <div>Weather-Based Content Generation Flow</div>
+            </section>
+
+            <section class="tech-stack">
+                <h3>Technology Stack</h3>
+                <ul class="tech-list">
+                    <li class="tech-item">n8n Workflow Engine</li>
+                    <li class="tech-item">Met Office API</li>
+                    <li class="tech-item">OpenAI GPT-4.1-mini</li>
+                    <li class="tech-item">XML/Atom Feed Processing</li>
+                    <li class="tech-item">JavaScript/Node.js</li>
+                    <li class="tech-item">CSV Data Management</li>
+                    <li class="tech-item">File System Operations</li>
+                    <li class="tech-item">HTTP Request Handling</li>
+                    <li class="tech-item">Content Deduplication</li>
+                    <li class="tech-item">Social Media APIs</li>
+                </ul>
+            </section>
+
+            <section class="project-details">
+                <h3>System Overview</h3>
+                <p>The marketing automation system operates on a schedule-triggered basis, monitoring UK weather conditions 
+                and automatically generating relevant content when specific weather warnings are detected. The system focuses 
+                on heat wave warnings and creates educational content about water conservation during periods of high demand.</p>
+
+                <h3>Core Components</h3>
+                
+                <div class="component-section">
+                    <h4>Weather Monitoring Engine</h4>
+                    <p>Continuously monitors Met Office Atom feeds for weather warnings using HTTP requests with 30-second timeout 
+                    and comprehensive error handling. Specifically filters for yellow heat warnings that indicate increased water demand periods.</p>
+                </div>
+
+                <div class="component-section">
+                    <h4>Content Intelligence System</h4>
+                    <p>Features a sophisticated content generation system with:</p>
+                    <ul>
+                        <li>10 different water-saving tip templates</li>
+                        <li>Random tip selection for content variety</li>
+                        <li>Regional customization based on weather warning areas</li>
+                        <li>Contextual messaging tied to specific weather conditions</li>
+                    </ul>
+                </div>
+
+                <div class="component-section">
+                    <h4>Duplicate Prevention System</h4>
+                    <p>Advanced CSV-based tracking system that prevents duplicate content generation by maintaining records 
+                    of previously posted warnings. Includes file existence checking and graceful error handling for new installations.</p>
+                </div>
+
+                <div class="component-section">
+                    <h4>Multi-Platform Publishing</h4>
+                    <p>Automated content distribution system supporting:</p>
+                    <ul>
+                        <li>Twitter/X post generation and formatting</li>
+                        <li>Facebook post optimization</li>
+                        <li>LinkedIn professional content (optional)</li>
+                        <li>File-based content storage for manual review</li>
+                    </ul>
+                </div>
+
+                <h3>Water-Saving Content Library</h3>
+                <p>The system includes a comprehensive library of water conservation tips specifically designed for heat wave periods:</p>
+                <ul>
+                    <li>"Take shorter showers (5 mins max) - saves water for everyone during 40% demand increases"</li>
+                    <li>"Turn off taps while brushing teeth - saves 8 gallons per day"</li>
+                    <li>"Water gardens early morning or late evening - reduces evaporation by 50%"</li>
+                    <li>"Fix dripping taps - single drips waste 3,000 gallons per year"</li>
+                    <li>"Cover pools during heat waves - prevents 1,000 gallons monthly loss"</li>
+                    <li>"Skip car washing during heat warnings - saves 150 gallons"</li>
+                    <li>"Run appliances only when full - saves 1,000 gallons monthly"</li>
+                    <li>"Check for toilet leaks - prevents 200 gallons daily waste"</li>
+                    <li>"Collect shower warm-up water for plant watering"</li>
+                    <li>"Keep water jugs in fridge - saves 2-3 gallons per cold water need"</li>
+                </ul>
+
+                <h3>Key Features</h3>
+                <ul>
+                    <li>Real-time Met Office weather warning monitoring</li>
+                    <li>Automatic heat wave detection and content triggering</li>
+                    <li>Regional content customization based on affected areas</li>
+                    <li>Intelligent duplicate prevention with CSV tracking</li>
+                    <li>Multi-platform social media content generation</li>
+                    <li>Water conservation education and awareness messaging</li>
+                    <li>Scheduled execution every 2 hours during monitoring periods</li>
+                    <li>Comprehensive error handling and graceful degradation</li>
+                    <li>File-based content storage for compliance and review</li>
+                    <li>Contextual messaging tied to specific weather severity</li>
+                </ul>
+
+                <h3>Business Impact & Effectiveness</h3>
+                <p>The automated marketing system provides several key benefits:</p>
+                <ul>
+                    <li>Timely water conservation messaging during critical periods</li>
+                    <li>Reduced manual content creation workload</li>
+                    <li>Consistent messaging across multiple social platforms</li>
+                    <li>Educational value for customers during heat waves</li>
+                    <li>Proactive communication about water demand challenges</li>
+                    <li>Regional relevance and targeted messaging</li>
+                </ul>
+
+                <h3>Technical Architecture</h3>
+                <p>The system uses a robust n8n workflow architecture with:</p>
+                <ul>
+                    <li>HTTP nodes for Met Office API integration</li>
+                    <li>JavaScript code nodes for complex data processing</li>
+                    <li>File I/O operations for content management</li>
+                    <li>Conditional logic for content generation decisions</li>
+                    <li>Error handling and retry mechanisms</li>
+                    <li>Scalable design for additional weather warning types</li>
+                </ul>
+
+                <h3>Content Generation Workflow</h3>
+                <p>The complete workflow process includes:</p>
+                <ol>
+                    <li>Scheduled trigger activation (every 2 hours)</li>
+                    <li>Met Office API feed retrieval and parsing</li>
+                    <li>Heat warning detection and filtering</li>
+                    <li>Duplicate check against historical posts</li>
+                    <li>Random water-saving tip selection</li>
+                    <li>Regional customization and message formatting</li>
+                    <li>Multi-platform content generation</li>
+                    <li>Content storage and tracking update</li>
+                </ol>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2024 Bence. AI Engineer & Product Designer.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

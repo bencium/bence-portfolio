@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+    <meta name="description" content="{{description}}">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="/">Bence</a>
+                </div>
+                <nav class="nav">
+                    <ul>
+                        <li><a href="/" class="{{#if isHome}}active{{/if}}">Home</a></li>
+                        <li><a href="/#portfolio" class="{{#if isPortfolio}}active{{/if}}">Portfolio</a></li>
+                        <li><a href="/about" class="{{#if isAbout}}active{{/if}}">About</a></li>
+                        <li><a href="/about#contact">Contact</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        {{{body}}}
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2024 Bence. AI Engineer & Product Designer.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Add keyboard navigation for project cards
+        document.addEventListener('DOMContentLoaded', function() {
+            const projectCards = document.querySelectorAll('.project-card');
+            
+            projectCards.forEach(card => {
+                card.setAttribute('tabindex', '0');
+                card.setAttribute('role', 'button');
+                
+                card.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        this.click();
+                    }
+                });
+            });
+
+            // Update active nav link
+            const currentPage = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav a');
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === currentPage || 
+                    (currentPage === '/' && link.getAttribute('href') === '/') ||
+                    (currentPage.includes('index.html') && link.getAttribute('href') === 'index.html')) {
+                    link.classList.add('active');
+                }
+            });
+
+            // Handle Portfolio section visibility
+            const portfolioSection = document.getElementById('portfolio');
+            const portfolioLink = document.querySelector('a[href="/#portfolio"]');
+            
+            if (portfolioSection && portfolioLink) {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            navLinks.forEach(link => link.classList.remove('active'));
+                            portfolioLink.classList.add('active');
+                        }
+                    });
+                }, { threshold: 0.3 });
+                
+                observer.observe(portfolioSection);
+            }
+        });
+    </script>
+</body>
+</html>

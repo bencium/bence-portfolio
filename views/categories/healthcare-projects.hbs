@@ -1,0 +1,35 @@
+<div class="container">
+    <a href="/" class="back-button">
+        <span>←</span> Back to Portfolio
+    </a>
+
+    <section class="category-page">
+        <header class="category-header">
+            <h1>🏥 Healthcare & Medical Applications</h1>
+            <p class="category-intro">
+                AI-powered healthcare solutions including RAG chatbots for patient support, medical practice management systems, 
+                and specialized applications for oncology, dental care, and mental health. These projects demonstrate real-world 
+                applications of AI in regulated healthcare environments with focus on patient safety and compliance.
+            </p>
+        </header>
+
+        <div class="projects-grid">
+            {{#each projects}}
+            <article class="project-card" onclick="location.href='/projects/{{id}}'">
+                <div class="project-image healthcare">
+                    <span>{{getShortTitle title}}</span>
+                </div>
+                <div class="project-content">
+                    <h3 class="project-title">{{title}}</h3>
+                    <p class="project-description">{{description}}</p>
+                    <div class="tech-tags">
+                        {{#each technologies}}
+                        <span class="tech-tag">{{this}}</span>
+                        {{/each}}
+                    </div>
+                </div>
+            </article>
+            {{/each}}
+        </div>
+    </section>
+</div>

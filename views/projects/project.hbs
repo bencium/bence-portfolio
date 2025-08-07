@@ -1,0 +1,43 @@
+<div class="container">
+    <a href="/" class="back-button">
+        <span>←</span> Back to Projects
+    </a>
+
+    <article class="project-header">
+        <h1>{{project.title}}</h1>
+        <p class="project-intro">
+            {{project.description}}
+        </p>
+    </article>
+
+    <section class="project-screenshot">
+        <div>Project Screenshot</div>
+    </section>
+
+    <section class="tech-stack">
+        <h3>Technology Stack</h3>
+        <div class="tech-list">
+            {{#each project.technologies}}
+            <span class="tech-item">{{this}}</span>
+            {{/each}}
+        </div>
+    </section>
+
+    <section class="project-details">
+        <h3>Project Details</h3>
+        <p>This is a {{project.category}} project that demonstrates advanced capabilities in {{project.technologies.[0]}} and related technologies.</p>
+        
+        {{#if project.featured}}
+        <p><strong>Featured Project:</strong> This project is highlighted as one of the key examples in the {{project.category}} category.</p>
+        {{/if}}
+        
+        {{#if project.link}}
+        <p><a href="{{project.link}}" target="_blank" rel="noopener noreferrer">View Live Project</a></p>
+        {{/if}}
+    </section>
+
+    <section class="related-projects">
+        <h3>Related Projects</h3>
+        <p>Explore more projects in the <a href="/{{project.category}}-projects">{{project.category}} category</a>.</p>
+    </section>
+</div>

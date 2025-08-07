@@ -1,0 +1,127 @@
+<div class="container">
+    <section class="hero">
+        <h1>{{portfolioData.title}}</h1>
+        <p class="project-intro">
+            {{portfolioData.description}}
+        </p>
+
+        <!-- Service Offerings Table -->
+        <div class="service-offerings">
+            <table class="offerings-table">
+                <thead>
+                    <tr>
+                        <th>Service</th>
+                        <th>What we remove</th>
+                        <th>What you get (in &lt; 30 days)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>1. MVP Brand & Product/Service Strategy</strong></td>
+                        <td>Endless workshops, design-by-committee</td>
+                        <td><strong>A market-tested MVP:</strong> name, brand system, value prop, and go-to-market plan shaped by real-time user data</td>
+                    </tr>
+                    <tr>
+                        <td><strong>2. Business Consultancy</strong></td>
+                        <td>Siloed roadmaps & slide decks</td>
+                        <td><strong>An execution playbook:</strong> prioritised growth levers, AI-driven benchmarks, and measurable KPIs that every stakeholder signs off in one sprint</td>
+                    </tr>
+                    <tr>
+                        <td><strong>3. Software & App Development</strong></td>
+                        <td>Friction between brief → dev → QA</td>
+                        <td><strong>Agentic micro-apps:</strong> production-ready code generated, tested, and deployed by autonomous AI workflows (with human oversight only where judgment adds value)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Why it works section -->
+        <div class="why-it-works">
+            <h2>Why it works</h2>
+            <div class="advantages">
+                <div class="advantage-item">
+                    <h4>Negative-space advantage</h4>
+                    <p>We design around what isn't needed, slashing coordination latency.</p>
+                </div>
+                <div class="advantage-item">
+                    <h4>Algorithmic governance</h4>
+                    <p>Agents read live demand signals and trigger micro-batches of product, content, or code. Winners scale; flops vanish.</p>
+                </div>
+                <div class="advantage-item">
+                    <h4>Supplier-grade cadence</h4>
+                    <p>Weekly deploys for software, weekly growth loops for you.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Call to Action -->
+        <div class="cta-section">
+            <h3>Ready?</h3>
+            <a href="/about#contact" class="cta-button">👉 Book a 15-min AI-Potential Call</a>
+        </div>
+    </section>
+
+    <section class="projects" id="portfolio">
+        <h2>Project Portfolio</h2>
+        
+        <!-- Portfolio Summary -->
+        <div class="portfolio-intro">
+            <p class="portfolio-summary">
+                <strong>{{portfolioData.stats.totalProjects}}+ AI-first projects</strong> across 8 specialized categories, demonstrating comprehensive expertise from healthcare systems 
+                serving real patients to cutting-edge AGI research tools. <strong>2+ years of development</strong> with measurable impact across 
+                healthcare, automation, and business intelligence sectors.
+            </p>
+            
+            <div class="portfolio-stats">
+                <div class="stat-item">
+                    <span class="stat-number">🏥 {{portfolioData.stats.healthcare}}</span>
+                    <span class="stat-label">Healthcare Projects</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">🤖 {{portfolioData.stats.automation}}</span>
+                    <span class="stat-label">AI Automation</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">🌐 {{portfolioData.stats.webapp}}</span>
+                    <span class="stat-label">Web Applications</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">💼 {{portfolioData.stats.business}}</span>
+                    <span class="stat-label">Client Projects</span>
+                </div>
+            </div>
+        </div>
+        
+        {{#each projectCategories}}
+        <!-- {{name}} -->
+        <div class="category-section">
+            <div class="category-header">
+                <h3 class="category-title">{{icon}} {{name}}</h3>
+                <span class="project-count">{{count}} Projects</span>
+            </div>
+            <p class="category-description">
+                {{description}}
+            </p>
+            
+            <div class="featured-projects">
+                {{#each featuredProjects}}
+                <article class="project-card featured" onclick="location.href='/projects/{{id}}'">
+                    <div class="project-image {{category}}">
+                        <span>{{shortTitle}}</span>
+                    </div>
+                    <div class="project-content">
+                        <h4 class="project-title">{{title}}</h4>
+                        <p class="project-description">{{description}}</p>
+                    </div>
+                </article>
+                {{/each}}
+            </div>
+            
+            <div class="view-all">
+                <a href="/{{id}}-projects" class="view-all-link">View All {{name}} ({{count}})</a>
+            </div>
+        </div>
+        {{/each}}
+
+    </section>
+</div>

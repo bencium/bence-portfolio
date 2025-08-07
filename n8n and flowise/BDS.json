@@ -1,0 +1,488 @@
+{
+  "name": "BDS",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression"
+            }
+          ]
+        }
+      },
+      "id": "304e2eb1-14b2-4426-8ca2-0f04c6916f26",
+      "name": "Schedule Every 5 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2100,
+        260
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Simulate reading Auriga CSV file\n// In production, this would connect to Auriga SFTP\nconst sampleData = `customer_ref,account_number,first_name,last_name,address_1,address_2,city,postcode,household_income,auriga_reference,application_date\nBDS2024001,3456789012,Sarah,Johnson,12 Oak Street,Flat 2A,Birmingham,B12 9QR,8500,AUR-2024-001,2024-06-28\nBDS2024002,3456789013,Mohammed,Ali,45 Victoria Road,,Coventry,CV1 2HG,12000,AUR-2024-002,2024-06-28\nBDS2024003,3456789014,Emma,Williams,8 Church Lane,,Stoke-on-Trent,ST4 6AB,15500,AUR-2024-003,2024-06-28\nBDS2024004,3456789015,James,Brown,156 High Street,Apt 3,Derby,DE1 3SW,22000,AUR-2024-004,2024-06-28\nBDS2024005,3456789016,Aisha,Patel,23 Mill Road,,Leicester,LE2 7QP,9200,AUR-2024-005,2024-06-28\nBDS2024006,INVALID,David,Smith,67 Queen Street,Unit 12,Nottingham,NG1 5DT,18000,AUR-2024-006,2024-06-28\nBDS2024007,3456789018,Maria,Garcia,89 King Road,,Worcester,WR1 3HP,11500,AUR-2024-007,2024-06-28\nBDS2024008,3456789019,Robert,Jones,34 Park Avenue,Flat B,Wolverhampton,WV1 4RE,25000,AUR-2024-008,2024-06-28\nBDS2024009,3456789020,Fatima,Ahmed,78 Station Road,,Birmingham,B21 8QW,7800,AUR-2024-009,2024-06-28\nBDS2024010,,Susan,Taylor,45 Green Lane,,Stoke-on-Trent,ST6 2AB,13500,AUR-2024-010,2024-06-28`;\n\nreturn [\n  {\n    json: {\n      file_found: true,\n      file_name: 'sample-auriga-data.csv',\n      file_size: sampleData.length,\n      processing_timestamp: new Date().toISOString(),\n      csv_content: sampleData\n    }\n  }\n];"
+      },
+      "id": "01d69ddf-dd3f-43db-be09-00b9ba295a13",
+      "name": "Simulate Auriga Data Source",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1880,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "file-found-check",
+              "leftValue": "={{ $json.file_found }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "d5e38cda-a28d-46c8-885e-2241956801d9",
+      "name": "File Available?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -1660,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse CSV data manually (since csvToJson node may not be available)\nconst csvContent = $input.first().json.csv_content;\nconst lines = csvContent.trim().split('\\n');\nconst headers = lines[0].split(',');\nconst records = [];\n\n// Parse each line into JSON object\nfor (let i = 1; i < lines.length; i++) {\n  const values = lines[i].split(',');\n  const record = {};\n  \n  for (let j = 0; j < headers.length; j++) {\n    record[headers[j]] = values[j] || '';\n  }\n  \n  records.push(record);\n}\n\nconsole.log(`Parsed ${records.length} customer records from CSV`);\n\n// Return each record as separate item for processing\nreturn records.map(record => ({ json: record }));"
+      },
+      "id": "df5ce075-5eb0-4e44-ab43-6215a3929a03",
+      "name": "Parse CSV Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1440,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// BDS Validation and Transformation Logic\nconst validationErrors = [];\nconst transformedData = [];\nconst processingTimestamp = new Date().toISOString();\n\n// Helper functions\nfunction calculateDiscountPercentage(income) {\n  if (income <= 6000) return 90;   // Extreme poverty\n  if (income <= 10000) return 80;  // Very low income\n  if (income <= 15000) return 70;  // Low income\n  if (income <= 18000) return 50;  // Moderate low income\n  if (income <= 21000) return 40;  // Below average\n  if (income <= 23492) return 30;  // BDS threshold\n  return 10; // Minimum discount\n}\n\nfunction calculateRenewalDate() {\n  const renewalDate = new Date();\n  renewalDate.setFullYear(renewalDate.getFullYear() + 1);\n  return renewalDate.toISOString();\n}\n\nfunction calculateMonthlyPayment(discount_percentage) {\n  const standardMonthlyBill = 39.00;\n  const discountedAmount = standardMonthlyBill * (discount_percentage / 100);\n  const finalPayment = standardMonthlyBill - discountedAmount;\n  return Math.max(3.90, finalPayment); // Minimum £3.90 per month\n}\n\n// Process each customer record\nfor (const item of $input.all()) {\n  const customer = item.json;\n  const errors = [];\n  \n  // Validation rules\n  if (!customer.customer_ref || customer.customer_ref.trim() === '') {\n    errors.push('Missing customer reference');\n  }\n  \n  if (!customer.account_number || customer.account_number.trim() === '') {\n    errors.push('Missing account number');\n  }\n  \n  if (!customer.household_income) {\n    errors.push('Missing household income');\n  }\n  \n  // Income validation\n  const income = parseFloat(customer.household_income);\n  if (isNaN(income) || income < 0) {\n    errors.push('Invalid household income format');\n  } else if (income > 23492) {\n    errors.push(`Income £${income} exceeds BDS threshold (£23,492)`);\n  }\n  \n  // Account number validation (10 digits)\n  if (customer.account_number && !/^\\d{10}$/.test(customer.account_number.toString())) {\n    errors.push('Invalid account number format (must be 10 digits)');\n  }\n  \n  if (errors.length > 0) {\n    validationErrors.push({\n      customer_ref: customer.customer_ref || 'UNKNOWN',\n      account_number: customer.account_number || 'UNKNOWN',\n      errors: errors,\n      original_data: customer,\n      processing_timestamp: processingTimestamp\n    });\n  } else {\n    // Transform valid data\n    const discount_percentage = calculateDiscountPercentage(income);\n    const monthly_payment = calculateMonthlyPayment(discount_percentage);\n    \n    const krakenCustomer = {\n      account_number: customer.account_number,\n      customer_reference: customer.customer_ref,\n      first_name: customer.first_name,\n      last_name: customer.last_name,\n      address_line_1: customer.address_1 || '',\n      address_line_2: customer.address_2 || '',\n      city: customer.city || '',\n      postcode: customer.postcode || '',\n      household_income: income,\n      discount_percentage: discount_percentage,\n      monthly_payment: monthly_payment,\n      annual_savings: (39.00 * 12) - (monthly_payment * 12),\n      application_date: processingTimestamp,\n      status: 'pending_approval',\n      scheme_type: 'big_difference_scheme',\n      renewal_date: calculateRenewalDate(),\n      auriga_ref: customer.auriga_reference,\n      priority_processing: income < 8000 ? 'high' : 'standard'\n    };\n    \n    transformedData.push(krakenCustomer);\n  }\n}\n\n// Calculate statistics\nconst totalProcessed = $input.all().length;\nconst validCount = transformedData.length;\nconst errorCount = validationErrors.length;\nconst successRate = totalProcessed > 0 ? ((validCount / totalProcessed) * 100).toFixed(2) : 0;\nconst totalAnnualSavings = transformedData.reduce((sum, c) => sum + c.annual_savings, 0);\nconst highPriorityCount = transformedData.filter(c => c.priority_processing === 'high').length;\n\nconsole.log(`Processing complete: ${validCount}/${totalProcessed} records valid (${successRate}%)`);\nconsole.log(`Total annual savings: £${totalAnnualSavings.toFixed(2)}`);\nconsole.log(`High priority customers: ${highPriorityCount}`);\n\nreturn [\n  {\n    json: {\n      valid_customers: transformedData,\n      validation_errors: validationErrors,\n      processing_summary: {\n        total_processed: totalProcessed,\n        valid_count: validCount,\n        error_count: errorCount,\n        success_rate_percentage: successRate,\n        processing_timestamp: processingTimestamp,\n        high_priority_customers: highPriorityCount,\n        total_annual_savings: totalAnnualSavings\n      }\n    }\n  }\n];"
+      },
+      "id": "e9f38196-8da5-4a4c-bc00-7edce8e6d86b",
+      "name": "Validate & Transform BDS Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1220,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Simulate database insert operation\n// In production, this would be actual database calls\nconst validCustomers = $input.first().json.valid_customers || [];\nconst processingData = $input.first().json.processing_summary;\n\nif (validCustomers.length > 0) {\n  console.log(`Simulating database insert for ${validCustomers.length} customers`);\n  \n  // Log some sample records being \"inserted\"\n  validCustomers.slice(0, 3).forEach((customer, index) => {\n    console.log(`Record ${index + 1}: ${customer.first_name} ${customer.last_name} - ${customer.discount_percentage}% discount (£${customer.monthly_payment}/month)`);\n  });\n} else {\n  console.log('No valid customers to insert into database');\n}\n\nreturn [\n  {\n    json: {\n      database_operation: 'INSERT',\n      table: 'bds_customers',\n      records_inserted: validCustomers.length,\n      operation_timestamp: new Date().toISOString(),\n      success: true,\n      processing_summary: processingData\n    }\n  }\n];"
+      },
+      "id": "66a5bb61-83b1-4c07-80ab-f082bea0b62f",
+      "name": "Simulate Kraken DB Insert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -780,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Simulate error logging\nconst validationErrors = $input.first().json.validation_errors || [];\n\nif (validationErrors.length > 0) {\n  console.log(`Simulating error log insert for ${validationErrors.length} failed records`);\n  \n  validationErrors.forEach((error, index) => {\n    console.log(`Error ${index + 1}: Customer ${error.customer_ref} - ${error.errors.join(', ')}`);\n  });\n} else {\n  console.log('No validation errors to log');\n}\n\nreturn [\n  {\n    json: {\n      database_operation: 'INSERT',\n      table: 'processing_errors',\n      error_records_logged: validationErrors.length,\n      operation_timestamp: new Date().toISOString(),\n      success: true\n    }\n  }\n];"
+      },
+      "id": "696b2ba3-8e67-4946-84a9-0f62bd5bd10a",
+      "name": "Simulate Error Logging",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -780,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Simulate API confirmation to Auriga\n// Get processing data from the validation node\nconst processingData = $node['Validate & Transform BDS Data'].json.processing_summary;\nconst timestamp = new Date().toISOString();\n\nconst confirmationPayload = {\n  file_name: 'sample-auriga-data.csv',\n  processing_timestamp: timestamp,\n  status: 'completed',\n  processed_count: processingData.valid_count,\n  error_count: processingData.error_count,\n  success_rate: processingData.success_rate_percentage,\n  confirmation_ref: `ST-DEMO-${Date.now()}`,\n  total_annual_savings: processingData.total_annual_savings\n};\n\nconsole.log('🔄 Auriga Confirmation Sent:');\nconsole.log(`   ✅ ${processingData.valid_count} customers processed successfully`);\nconsole.log(`   ❌ ${processingData.error_count} records failed validation`);\nconsole.log(`   📊 ${processingData.success_rate_percentage}% success rate`);\nconsole.log(`   💰 £${processingData.total_annual_savings.toFixed(2)} total annual savings`);\nconsole.log(`   🆔 Confirmation: ${confirmationPayload.confirmation_ref}`);\n\nreturn [\n  {\n    json: {\n      confirmation_sent: true,\n      confirmation_payload: confirmationPayload,\n      api_response_simulated: {\n        status: 200,\n        message: 'Processing confirmation received successfully',\n        auriga_batch_id: `AUR-${Date.now()}`,\n        received_timestamp: timestamp\n      }\n    }\n  }\n];"
+      },
+      "id": "9d5b82d3-12a0-4cde-bea5-7a2c4bfecdd9",
+      "name": "Confirm Processing to Auriga",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -560,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Generate comprehensive processing summary\n// Get confirmation data from previous node\nconst confirmationData = $input.first().json;\nconst processingData = confirmationData.confirmation_payload;\n\nfunction formatCurrency(amount) {\n  return `£${amount.toFixed(2)}`;\n}\n\n// Create detailed summary\nconst summary = {\n  email_notification: {\n    subject: `BDS Processing Complete - ${processingData.processed_count} customers processed (${processingData.success_rate}% success rate)`,\n    \n    body_html: `\n      <h2 style=\"color: #0066cc;\">🌊 BDS Automation Processing Summary</h2>\n      \n      <div style=\"background-color: #f0f8ff; padding: 15px; border-left: 4px solid #0066cc; margin: 10px 0;\">\n        <h3>📊 Processing Overview</h3>\n        <p><strong>File:</strong> ${processingData.file_name}</p>\n        <p><strong>Processing Time:</strong> ${new Date().toLocaleString('en-GB')}</p>\n        <p><strong>Total Records:</strong> ${processingData.processed_count + processingData.error_count}</p>\n        <p><strong>Successfully Processed:</strong> <span style=\"color: green; font-weight: bold;\">${processingData.processed_count}</span></p>\n        <p><strong>Errors:</strong> <span style=\"color: ${processingData.error_count > 0 ? 'red' : 'green'}; font-weight: bold;\">${processingData.error_count}</span></p>\n        <p><strong>Success Rate:</strong> <span style=\"color: ${processingData.success_rate >= 90 ? 'green' : processingData.success_rate >= 75 ? 'orange' : 'red'}; font-weight: bold;\">${processingData.success_rate}%</span></p>\n      </div>\n      \n      <div style=\"background-color: #f0fff0; padding: 15px; border-left: 4px solid #28a745; margin: 10px 0;\">\n        <h3>💰 Financial Impact</h3>\n        <p><strong>Total Annual Savings:</strong> <span style=\"color: green; font-weight: bold;\">${formatCurrency(processingData.total_annual_savings)}</span></p>\n        <p><strong>Average Annual Saving per Customer:</strong> ${formatCurrency(processingData.total_annual_savings / processingData.processed_count)}</p>\n      </div>\n      \n      <div style=\"background-color: #f8f9fa; padding: 15px; border: 1px solid #dee2e6; margin: 10px 0;\">\n        <h3>✅ Next Steps</h3>\n        <ul>\n          <li>Valid customers have been added to Kraken database</li>\n          <li>Auriga has been notified of processing completion</li>\n          <li>Error records logged for manual review and correction</li>\n        </ul>\n      </div>\n    `,\n    \n    recipients: ['customer.services@severntrent.co.uk', 'bds.team@severntrent.co.uk']\n  },\n  \n  processing_metrics: {\n    total_processed: processingData.processed_count + processingData.error_count,\n    success_count: processingData.processed_count,\n    error_count: processingData.error_count,\n    success_rate: processingData.success_rate,\n    total_savings: processingData.total_annual_savings,\n    confirmation_ref: processingData.confirmation_ref\n  }\n};\n\nconsole.log('📧 Email Summary Generated:');\nconsole.log(`   📮 Subject: ${summary.email_notification.subject}`);\nconsole.log(`   👥 Recipients: ${summary.email_notification.recipients.join(', ')}`);\nconsole.log(`   💾 Confirmation Ref: ${summary.processing_metrics.confirmation_ref}`);\n\nreturn [\n  {\n    json: summary\n  }\n];"
+      },
+      "id": "d4780a78-a224-4a93-aa45-01ab7eae8b4d",
+      "name": "Generate Processing Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -340,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "high-error-rate",
+              "leftValue": "={{ $json.processing_summary.error_count / $json.processing_summary.total_processed }}",
+              "rightValue": 0.1,
+              "operator": {
+                "type": "number",
+                "operation": "larger"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "9b81e842-b543-416d-826a-2432977cc516",
+      "name": "High Error Rate?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -820,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Generate high error rate alert\n// Get processing data directly from validation node\nconst processingData = $node['Validate & Transform BDS Data'].json.processing_summary;\nconst errorRate = (processingData.error_count / processingData.total_processed * 100).toFixed(2);\n\nconst alert = {\n  alert_notification: {\n    subject: `🚨 URGENT: High BDS Processing Error Rate Detected (${errorRate}%)`,\n    \n    body_html: `\n      <div style=\"background-color: #fff5f5; border: 2px solid #dc3545; padding: 20px; margin: 10px;\">\n        <h2 style=\"color: #dc3545; margin-top: 0;\">🚨 URGENT: BDS Processing Alert</h2>\n        \n        <div style=\"background-color: #f8d7da; padding: 15px; border-radius: 5px; margin: 15px 0;\">\n          <h3>Critical Metrics</h3>\n          <p><strong>Error Rate:</strong> <span style=\"color: #dc3545; font-size: 18px; font-weight: bold;\">${errorRate}%</span></p>\n          <p><strong>Total Errors:</strong> ${processingData.error_count} out of ${processingData.total_processed} records</p>\n          <p><strong>Processing Time:</strong> ${new Date().toLocaleString('en-GB')}</p>\n        </div>\n        \n        <div style=\"background-color: #ffffff; padding: 15px; border: 1px solid #dc3545; border-radius: 5px;\">\n          <h3 style=\"color: #dc3545;\">🔥 Immediate Actions Required</h3>\n          <ol>\n            <li><strong>Review error details</strong> in processing logs immediately</li>\n            <li><strong>Check Auriga data quality</strong> - potential upstream issues</li>\n            <li><strong>Verify schema mapping accuracy</strong></li>\n            <li><strong>Consider manual intervention</strong> for failed records</li>\n          </ol>\n        </div>\n        \n        <p style=\"color: #dc3545; font-weight: bold;\">\n          Please investigate immediately to prevent BDS deadline issues.\n        </p>\n      </div>\n    `,\n    \n    recipients: ['bds.managers@severntrent.co.uk', 'operations@severntrent.co.uk']\n  },\n  \n  alert_level: 'HIGH',\n  error_rate: errorRate,\n  requires_immediate_action: true\n};\n\nconsole.log('🚨 HIGH ERROR RATE ALERT GENERATED:');\nconsole.log(`   ⚠️  Error Rate: ${errorRate}% (Threshold: 10%)`);\nconsole.log(`   📧 Alert sent to: ${alert.alert_notification.recipients.join(', ')}`);\nconsole.log(`   🚨 Alert Level: ${alert.alert_level}`);\n\nreturn [\n  {\n    json: alert\n  }\n];"
+      },
+      "id": "b62f06a7-2258-4611-9c62-1b85d2b52f8b",
+      "name": "Generate High Error Alert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -340,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Create final audit log entry\n// Get summary data from previous node\nconst summaryData = $input.first().json;\nconst metrics = summaryData.processing_metrics;\n\nconst auditLog = {\n  audit_entry: {\n    file_name: 'sample-auriga-data.csv',\n    processing_date: new Date().toISOString(),\n    total_records: metrics.total_processed,\n    valid_records: metrics.success_count,\n    error_records: metrics.error_count,\n    success_rate_percentage: parseFloat(metrics.success_rate),\n    total_annual_savings: metrics.total_savings,\n    confirmation_ref: metrics.confirmation_ref,\n    audit_timestamp: new Date().toISOString()\n  },\n  \n  workflow_summary: {\n    status: 'COMPLETED',\n    processing_duration: '~2 minutes',\n    data_flow: 'Auriga → Validation → Kraken → Confirmation',\n    business_impact: `£${metrics.total_savings.toFixed(2)} annual savings for ${metrics.success_count} vulnerable customers`\n  }\n};\n\nconsole.log('📋 AUDIT LOG CREATED:');\nconsole.log(`   📁 File: ${auditLog.audit_entry.file_name}`);\nconsole.log(`   📊 Records: ${auditLog.audit_entry.valid_records}/${auditLog.audit_entry.total_records} (${auditLog.audit_entry.success_rate_percentage}%)`);\nconsole.log(`   💰 Savings: £${auditLog.audit_entry.total_annual_savings.toFixed(2)}`);\nconsole.log(`   🆔 Ref: ${auditLog.audit_entry.confirmation_ref}`);\nconsole.log(`   ✅ Status: ${auditLog.workflow_summary.status}`);\n\nreturn [\n  {\n    json: auditLog\n  }\n];"
+      },
+      "id": "32a19618-a64b-40ef-b470-d811db6707d7",
+      "name": "Create Audit Log",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -120,
+        260
+      ]
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2120,
+        40
+      ],
+      "id": "3ab3a855-cf96-4d25-bccb-e39599200e32",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "sendTo": "mondweep@gmail.com",
+        "subject": "={{ $('Generate Processing Summary').item.json.email_notification.subject }}",
+        "message": "={{ $('Generate Processing Summary').item.json.email_notification.body_html }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "7fc41963-2c8c-4126-b918-8676c6a47d6b",
+      "name": "Send a message",
+      "webhookId": "ca9232db-a535-441a-82fc-ece64d696b05",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "sendTo": "mondweep@gmail.com",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.body }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        540,
+        560
+      ],
+      "id": "33aa3b34-af54-4a6f-a988-83eb099b117d",
+      "name": "Send a message1",
+      "webhookId": "0f98502c-55e7-49ea-8f87-b0cbe8b77009",
+      "disabled": true
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -120,
+        560
+      ],
+      "id": "3e9f234b-73ae-4afd-bcae-7a1fe5a7a297",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// 1. Get the raw output from the AI, which might include markdown backticks\nconst rawOutput = $('AI Agent').item.json.output;\n\n// 2. Use a regular expression to find and extract the JSON object within the text.\n// This looks for the first '{' to the very last '}' and everything in between.\nconst jsonMatch = rawOutput.match(/\\{[\\s\\S]*\\}/);\n\n// 3. Check if we found a valid JSON string\nif (jsonMatch && jsonMatch[0]) {\n  // 4. If we found it, parse only the extracted JSON part\n  return JSON.parse(jsonMatch[0]);\n} else {\n  // 5. If no JSON was found, throw an error to stop the workflow\n  throw new Error(\"Could not find a valid JSON object in the AI's output.\");\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        560
+      ],
+      "id": "403b5dfd-40c6-4444-a9ba-84b6d109d161",
+      "name": "AI Output2Structured"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0935A21J31",
+          "mode": "list",
+          "cachedResultName": "severn-trent-demo"
+        },
+        "text": "={{ $json.audit_entry.file_name }} was processed on {{ $json.audit_entry.processing_date }}. There were a total of {{ $json.audit_entry.total_records }} of which {{ $json.audit_entry.valid_records }} were valid. The activity was audited at {{ $json.audit_entry.audit_timestamp }} with confirmation number {{ $json.audit_entry.confirmation_ref }}. The activity had a business impact of {{ $json.workflow_summary.business_impact }}. \n\nAuriga were intimated of the {{ $('Confirm Processing to Auriga').item.json.confirmation_payload.error_count }} failure records and the reasons for the failures.",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        100,
+        260
+      ],
+      "id": "fc7e0335-cf49-44f7-a67d-e8d5e7dd5d32",
+      "name": "Send Slack message2",
+      "webhookId": "371d7294-4ddb-486b-8c38-e9055fb541fe",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "REgvfh6Ct4w7CKrT",
+          "name": "Slack account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Every 5 Minutes": {
+      "main": [
+        [
+          {
+            "node": "Simulate Auriga Data Source",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simulate Auriga Data Source": {
+      "main": [
+        [
+          {
+            "node": "File Available?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "File Available?": {
+      "main": [
+        [
+          {
+            "node": "Parse CSV Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse CSV Data": {
+      "main": [
+        [
+          {
+            "node": "Validate & Transform BDS Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate & Transform BDS Data": {
+      "main": [
+        [
+          {
+            "node": "Simulate Kraken DB Insert",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Simulate Error Logging",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "High Error Rate?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simulate Kraken DB Insert": {
+      "main": [
+        [
+          {
+            "node": "Confirm Processing to Auriga",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simulate Error Logging": {
+      "main": [
+        [
+          {
+            "node": "Confirm Processing to Auriga",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirm Processing to Auriga": {
+      "main": [
+        [
+          {
+            "node": "Generate Processing Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Processing Summary": {
+      "main": [
+        [
+          {
+            "node": "Create Audit Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "High Error Rate?": {
+      "main": [
+        [
+          {
+            "node": "Generate High Error Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Simulate Auriga Data Source",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Audit Log": {
+      "main": [
+        [
+          {
+            "node": "Send Slack message2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Output2Structured": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "8ae9e005-17b6-448e-8008-3f122a16e31c",
+  "meta": {
+    "instanceId": "d790d37fd7f43abb4c4bfb90577e84fe26bea6871b27e97246fab4ce6af39dc3"
+  },
+  "id": "QCfpbHEgHz4oXQcS",
+  "tags": [
+    {
+      "createdAt": "2025-06-29T10:07:48.596Z",
+      "updatedAt": "2025-06-29T10:07:48.596Z",
+      "id": "8em7rAnrXC7UJv3P",
+      "name": "BDS Simple Demo"
+    }
+  ]
+}

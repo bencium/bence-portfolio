@@ -1,0 +1,78 @@
+# Dependencies
+node_modules
+npm-debug.log*
+
+# Build outputs that will be generated in container
+dist
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Documentation
+README.md
+*.md
+
+# Test files
+coverage
+.nyc_output
+test
+**/*.spec.ts
+**/*.test.ts
+
+# Development files
+.eslintrc.js
+.prettierrc
+tsconfig.json
+tsconfig.build.json
+
+# Logs
+logs
+*.log
+
+# Development tools
+.github
+.circleci
+
+# Original HTML files (no longer needed)
+index.html
+about.html
+healthcare-projects.html
+research-projects.html
+automation-projects.html
+webapp-projects.html
+business-projects.html
+tools-projects.html
+analytics-projects.html
+design-projects.html
+
+# Project documentation
+CLAUDE.md
+prd.md
+PROJECT_OVERVIEW*.md
+claude-project-files.md
+githubrepos.md
+
+# n8n workflows (not needed in production)
+n8n and flowise/
+
+# Original projects folder (replaced by dynamic templates)
+projects/

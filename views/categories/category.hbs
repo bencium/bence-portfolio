@@ -1,0 +1,39 @@
+<div class="container">
+    <a href="/" class="back-button">
+        <span>←</span> Back to Portfolio
+    </a>
+
+    <section class="category-page">
+        <header class="category-header">
+            <h1>{{category.icon}} {{category.name}}</h1>
+            <p class="category-intro">
+                {{category.description}}
+            </p>
+        </header>
+
+        <div class="projects-grid">
+            {{#each projects}}
+            <article class="project-card" onclick="location.href='/projects/{{id}}'">
+                <div class="project-image {{category}}">
+                    <span>{{shortTitle}}</span>
+                </div>
+                <div class="project-content">
+                    <h3 class="project-title">{{title}}</h3>
+                    <p class="project-description">{{description}}</p>
+                    <div class="tech-tags">
+                        {{#each technologies}}
+                        <span class="tech-tag">{{this}}</span>
+                        {{/each}}
+                    </div>
+                </div>
+            </article>
+            {{/each}}
+        </div>
+
+        {{#unless projects.length}}
+        <div class="no-projects">
+            <p>No projects found in this category yet. Check back soon!</p>
+        </div>
+        {{/unless}}
+    </section>
+</div>

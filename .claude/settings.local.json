@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(gh:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(mv:*)",
+      "Bash(find:*)",
+      "WebFetch(domain:docs.nestjs.com)",
+      "Bash(cp:*)",
+      "Bash(npm install)",
+      "Bash(npm run build:*)",
+      "Bash(npm run start:dev:*)",
+      "Bash(PORT=3001 npm run start:dev)",
+      "Bash(curl:*)",
+      "Bash(pkill:*)",
+      "Bash(npm run start:*)",
+      "Bash(PORT=3002 npm run start)",
+      "Bash(grep:*)",
+      "Bash(echo:*)",
+      "Bash(mcp list:*)",
+      "WebFetch(domain:localhost)",
+      "Bash(open:*)",
+      "Bash(git init:*)",
+      "Bash(git branch:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": []
+  }
+}

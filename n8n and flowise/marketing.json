@@ -1,0 +1,194 @@
+{
+  "name": "marketing",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "id": "ae55cb28-f2f0-4e70-977e-4ef04eadb81c",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://www.stwater.co.uk/news/news-releases/from-helicopters-to-river-health---local-army-veteran-finds-new-/",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          },
+          "timeout": 30000
+        }
+      },
+      "id": "6f6df63b-3483-4e9d-be84-1404be01dac1",
+      "name": "Fetch Stwater Website",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        200,
+        0
+      ],
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract clean text from the website response\nconst response = $input.first().json;\nlet content = '';\n\nif (response.body) {\n  content = response.body;\n} else if (response.data) {\n  content = response.data;\n} else {\n  content = JSON.stringify(response);\n}\n\n// Clean HTML and extract useful text\nconst cleanText = content\n  .replace(/<[^>]*>/g, ' ')  // Remove HTML tags\n  .replace(/\\s+/g, ' ')      // Normalize whitespace\n  .trim();\n\n// Extract first 2000 characters for AI processing\nconst websiteContent = cleanText.substring(0, 4000);\n\nreturn [{\n  json: {\n    websiteContent: websiteContent,\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "03e086fc-57e6-4489-9c37-be17e0edd989",
+      "name": "Parse Website Content",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        0
+      ],
+      "executeOnce": false,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract the AI-generated content\nconst response = $input.first().json;\nlet generatedPost = '';\n\nif (response.choices && response.choices[0] && response.choices[0].message) {\n  generatedPost = response.choices[0].message.content;\n} else if (response.message) {\n  generatedPost = response.message.content;\n} else {\n  generatedPost = JSON.stringify(response);\n}\n\n// Add source attribution\nconst finalPost = generatedPost + '\\n\\nSource: stwater.co.uk';\n\n// Convert to binary data for file writing\nconst binaryData = Buffer.from(finalPost, 'utf8').toString('base64');\n\nreturn [{\n  json: {\n    content: finalPost,\n    timestamp: new Date().toISOString(),\n    aiGenerated: true\n  },\n  binary: {\n    data: {\n      data: binaryData,\n      mimeType: 'text/plain',\n      fileName: `post_${new Date().toISOString().slice(0,16).replace(/:/g,'-')}.txt`\n    }\n  }\n}];"
+      },
+      "id": "456afae4-f67a-4a70-8d51-1c42972c760d",
+      "name": "Format Final Post",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        940,
+        -20
+      ]
+    },
+    {
+      "parameters": {
+        "fileName": "testpost.txt",
+        "options": {}
+      },
+      "id": "fe4e3596-4867-4d97-aa8a-29c85b0f62e7",
+      "name": "Save Post",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        1160,
+        -20
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You are a social media content creator for water conservation. Create engaging, informative posts based on website content. Keep posts under 800 characters, include relevant emojis, and add appropriate hashtags. Focus on practical water-saving tips and interesting facts.",
+              "role": "system"
+            },
+            {
+              "content": "=Based on this content from stwater.co.uk, create an engaging social media post:\\\\n\\\\n={{$json.websiteContent}}\\\\n\\\\nMake it interesting, actionable, and include water-saving tips. Add emojis and hashtags. {{ $json.websiteContent }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        580,
+        -20
+      ],
+      "id": "f5b78f50-5554-4337-aa40-fdf6b0690b5d",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "N8MfOR5oqvOYGkor",
+          "name": "OpenAi account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Stwater Website",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Stwater Website": {
+      "main": [
+        [
+          {
+            "node": "Parse Website Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Final Post": {
+      "main": [
+        [
+          {
+            "node": "Save Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Website Content": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Format Final Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a6df0aab-13cc-4d3e-8056-5a2725f454fa",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d790d37fd7f43abb4c4bfb90577e84fe26bea6871b27e97246fab4ce6af39dc3"
+  },
+  "id": "tiPGP76SUsOupFps",
+  "tags": []
+}

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - Bence Portfolio</title>
+    <meta name="description" content="About Bence, AI engineer and product designer specializing in AI-first software for regulated markets">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="index.html">Bence</a>
+                </div>
+                <nav class="nav">
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="index.html#portfolio">Portfolio</a></li>
+                        <li><a href="about.html" class="active">About</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <article class="about-content">
+                <h1>About</h1>
+                
+                <p>
+                    I'm an AI engineer, product designer, and strategist who specializes in building AI-first software 
+                    systems for both regulated and unregulated markets. My work spans healthcare, real estate, and 
+                    productivity tools, where I focus on creating practical, scalable, and maintainable solutions 
+                    that bridge technical innovation with user-centered design.
+                </p>
+
+                <p>
+                    My approach combines pragmatism with technical depth—I believe in building quick, working prototypes 
+                    that can validate ideas fast, then refining them into robust systems. I'm particularly passionate 
+                    about agentic workflows, RAG systems, multimodal retrieval, and LLM-integrated architectures that 
+                    go beyond traditional monolithic applications.
+                </p>
+
+                <p>
+                    When I'm not building software, I teach AI adoption to senior professionals and enterprise teams, 
+                    helping organizations navigate the practical challenges of implementing AI systems in complex 
+                    regulatory environments. I advocate for human-in-the-loop approaches that maintain user agency 
+                    while leveraging AI capabilities to enhance productivity and decision-making.
+                </p>
+
+                <h2>Technical Focus</h2>
+                <p>
+                    I work primarily with modern web technologies including Next.js, React, TypeScript, and various 
+                    database solutions like PostgreSQL and Supabase. My projects often involve integrating AI/ML 
+                    capabilities, building responsive user interfaces, and creating scalable backend systems that 
+                    can handle complex workflows and real-time collaboration.
+                </p>
+
+                <p>
+                    I prefer minimal dependencies and lean solutions over heavy frameworks, always keeping ownership 
+                    of core logic while strategically using no-code/low-code tools where they add value without 
+                    compromising flexibility.
+                </p>
+
+                <section class="contact-info" id="contact">
+                    <h3>Contact</h3>
+                    <p>
+                        I'm always interested in discussing new projects, collaboration opportunities, 
+                        or sharing insights about AI implementation in regulated industries.
+                    </p>
+                    <p>
+                        <strong>Email:</strong> <a href="mailto:hello@bence.dev">hello@bence.dev</a>
+                    </p>
+                    <p>
+                        <strong>LinkedIn:</strong> <a href="https://linkedin.com/in/bence-dev" target="_blank" rel="noopener noreferrer">linkedin.com/in/bence-dev</a>
+                    </p>
+                    <p>
+                        <strong>GitHub:</strong> <a href="https://github.com/bence-dev" target="_blank" rel="noopener noreferrer">github.com/bence-dev</a>
+                    </p>
+                    <p>
+                        <strong>Location:</strong> Available for remote collaboration worldwide
+                    </p>
+                </section>
+            </article>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2024 Bence. AI Engineer & Product Designer.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Update active nav link
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPage = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav a');
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === 'about.html' || 
+                    (currentPage.includes('about') && link.getAttribute('href') === 'about.html')) {
+                    link.classList.add('active');
+                }
+            });
+
+            // Smooth scroll for contact link
+            const contactLinks = document.querySelectorAll('a[href="#contact"]');
+            contactLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.getElementById('contact').scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

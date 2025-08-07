@@ -1,0 +1,187 @@
+{
+  "name": "Marketing-heatwave content",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 2
+            }
+          ]
+        }
+      },
+      "id": "36ef3a71-980c-442e-b3e7-26e4c8b71d38",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -380,
+        -240
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{$vars.MET_OFFICE_API_URL}}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "00247fa5-9330-4c05-881e-eae3bab51179",
+      "name": "Get Met Office Warnings",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -180,
+        -240
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse the Met Office Atom feed response\nconst items = [];\nconst response = $input.first().json;\n\n// Check if we have entries in the feed\nif (response.feed && response.feed.entry) {\n  const entries = Array.isArray(response.feed.entry) ? response.feed.entry : [response.feed.entry];\n  \n  for (const entry of entries) {\n    // Extract warning details\n    const title = entry.title || '';\n    const summary = entry.summary || '';\n    const content = entry.content || '';\n    \n    // Check if this is a heat warning (yellow level)\n    const isHeatWarning = (\n      title.toLowerCase().includes('heat') || \n      summary.toLowerCase().includes('heat') ||\n      content.toLowerCase().includes('heat')\n    );\n    \n    const isYellowWarning = (\n      title.toLowerCase().includes('yellow') || \n      summary.toLowerCase().includes('yellow') ||\n      content.toLowerCase().includes('yellow')\n    );\n    \n    if (isHeatWarning && isYellowWarning) {\n      items.push({\n        json: {\n          id: entry.id,\n          title: title,\n          summary: summary,\n          content: content,\n          published: entry.published,\n          updated: entry.updated,\n          isHeatWarning: true,\n          warningLevel: 'yellow'\n        }\n      });\n    }\n  }\n}\n\nreturn items;"
+      },
+      "id": "cfcce0c4-e50e-443f-9f4c-8a33fd7589d4",
+      "name": "Parse & Filter Heat Warnings",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        20,
+        -240
+      ]
+    },
+    {
+      "parameters": {
+        "filePath": "posted_warnings.csv"
+      },
+      "id": "aadcb43d-6910-44bc-9848-fdd260e48e44",
+      "name": "Read Posted Warnings",
+      "type": "n8n-nodes-base.readBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        220,
+        -340
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Check if warning has already been posted\nconst currentWarning = $input.first();\nconst warningId = currentWarning.json.id;\n\n// Get previously posted warnings\nlet postedWarnings = [];\ntry {\n  const csvData = $('Read Posted Warnings').first();\n  if (csvData && csvData.binary && csvData.binary.data) {\n    const csvContent = Buffer.from(csvData.binary.data, 'base64').toString('utf8');\n    postedWarnings = csvContent.split('\\n').filter(line => line.trim());\n  }\n} catch (error) {\n  // File doesn't exist yet, that's okay\n}\n\n// Check if this warning was already posted\nif (postedWarnings.includes(warningId)) {\n  return []; // Skip this warning\n}\n\n// Generate water-saving tips based on heat warning\nconst waterSavingTips = [\n  \"💧 During heat waves, water demand increases by 40%! Take shorter showers (5 mins max) to help conserve water for everyone.\",\n  \"🚿 Hot weather tip: Turn off the tap while brushing teeth. This simple act saves 8 gallons of water per day!\",\n  \"🌱 Water your garden early morning or late evening during heat waves. This reduces evaporation by up to 50%!\",\n  \"🚰 Fix dripping taps NOW! A single drip wastes 3,000 gallons per year - crucial during water shortages.\",\n  \"🏊 Cover your pool during heat waves to reduce evaporation. An uncovered pool loses 1,000 gallons per month!\",\n  \"🚗 Skip the car wash during heat warnings. A single car wash uses 150 gallons of precious water.\",\n  \"🍽️ Run dishwashers & washing machines only when full. This saves 1,000 gallons per month during critical periods.\",\n  \"🚽 Check for toilet leaks - they waste up to 200 gallons daily! Put food coloring in the tank to test.\",\n  \"🪣 Collect shower water while waiting for it to warm up. Use it to water plants during the heat wave!\",\n  \"❄️ Keep a jug of water in the fridge instead of running the tap for cold water. Saves 2-3 gallons each time!\"\n];\n\n// Select a random tip\nconst randomTip = waterSavingTips[Math.floor(Math.random() * waterSavingTips.length)];\n\n// Create the social media post\nconst regions = currentWarning.json.summary.match(/regions?: ([^.]+)/i)?.[1] || 'your area';\nconst post = {\n  message: `⚠️ YELLOW HEAT WARNING for ${regions}\\n\\n${randomTip}\\n\\n🌡️ Stay hydrated & save water!\\n#HeatWave #WaterConservation #SaveWater #ClimateAction #UKWeather`,\n  warningId: warningId,\n  timestamp: new Date().toISOString(),\n  regions: regions\n};\n\nreturn [{\n  json: post\n}];"
+      },
+      "id": "73802ff0-30bc-4a42-a319-947a3bb0ad2d",
+      "name": "Generate Water Saving Post",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        420,
+        -240
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "aa6c5968-e8c6-4aac-9718-3e233372de0c",
+      "name": "Save Twitter/X Post",
+      "type": "n8n-nodes-base.writeFile",
+      "typeVersion": 1,
+      "position": [
+        620,
+        -340
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "a2060775-ed9d-4ee4-ad62-a7449ad39759",
+      "name": "Save Facebook Post",
+      "type": "n8n-nodes-base.writeFile",
+      "typeVersion": 1,
+      "position": [
+        620,
+        -140
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "02ecd2e4-fc9c-4e72-8a35-2d233c01d386",
+      "name": "Save Posted Warning",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        820,
+        -240
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "33f0a144-1ccf-4fa3-a886-bcc9a48a7041",
+      "name": "Save LinkedIn Post (Optional)",
+      "type": "n8n-nodes-base.writeFile",
+      "typeVersion": 1,
+      "position": [
+        620,
+        60
+      ],
+      "disabled": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Met Office Warnings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Met Office Warnings": {
+      "main": [
+        [
+          {
+            "node": "Parse & Filter Heat Warnings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse & Filter Heat Warnings": {
+      "main": [
+        [
+          {
+            "node": "Read Posted Warnings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Posted Warnings": {
+      "main": [
+        [
+          {
+            "node": "Generate Water Saving Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d5a7a0bb-49d3-4590-9740-c84a794f30ae",
+  "meta": {
+    "instanceId": "d790d37fd7f43abb4c4bfb90577e84fe26bea6871b27e97246fab4ce6af39dc3"
+  },
+  "id": "8i92S3zsxTsEv90u",
+  "tags": []
+}
