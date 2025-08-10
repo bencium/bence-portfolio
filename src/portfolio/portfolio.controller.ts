@@ -1,5 +1,5 @@
-import { Controller, Get, Render, Param, HttpCode } from '@nestjs/common';
-import { PortfolioService } from './portfolio.service';
+import { Controller, Get, Render, Param, Query, HttpCode } from '@nestjs/common';
+import { PortfolioService, ProjectSearchQuery } from './portfolio.service';
 
 @Controller()
 export class PortfolioController {
@@ -7,28 +7,86 @@ export class PortfolioController {
 
   @Get()
   @Render('index')
-  getHome() {
+  async getHome(
+    @Query('search') search?: string, 
+    @Query('category') category?: string, 
+    @Query('tech') tech?: string
+  ) {
+    // Ensure query has default values
+    const searchQuery = {
+      search: search || '',
+      category: category || '',
+      tech: tech || ''
+    };
+    console.log('Debug - Individual params:', { search, category, tech });
+    console.log('Debug - Received query params:', searchQuery);
+    
     const categories = this.portfolioService.getProjectCategories();
-    const categoriesWithFeaturedProjects = categories.map(category => {
+    const allCategories = await this.portfolioService.getCategoriesWithCounts();
+    const allTechnologies = await this.portfolioService.getAllTechnologies();
+    
+    console.log('Debug - Categories count:', allCategories.length);
+    console.log('Debug - Technologies count:', allTechnologies.length);
+    console.log('Debug - First few categories:', allCategories.slice(0, 2));
+    console.log('Debug - First few technologies:', allTechnologies.slice(0, 5));
+
+    // If there are query parameters, filter the projects
+    const hasFilters = !!(searchQuery.search || searchQuery.category || searchQuery.tech);
+    console.log('Debug - searchQuery:', searchQuery);
+    console.log('Debug - hasFilters:', hasFilters);
+    const filteredProjects = hasFilters ? 
+      (await this.portfolioService.searchProjects(searchQuery)).map(project => ({
+        ...project,
+        shortTitle: this.getShortTitle(project.title)
+      })) : 
+      null;
+      
+    if (hasFilters) {
+      console.log('Debug - Filtered projects count:', filteredProjects.length);
+    }
+
+    // Build categories with featured projects (for default view)
+    const categoriesWithFeaturedProjects = await Promise.all(categories.map(async category => {
       const categoryData = this.portfolioService.getCategoryData(category.id);
+      const featuredProjects = await this.portfolioService.getFeaturedProjectsByCategory(category.id);
       return {
         ...category,
         description: categoryData?.description || '',
-        featuredProjects: this.portfolioService.getFeaturedProjectsByCategory(category.id)
-          .map(project => ({
-            ...project,
-            shortTitle: this.getShortTitle(project.title)
-          }))
+        featuredProjects: featuredProjects.map(project => ({
+          ...project,
+          shortTitle: this.getShortTitle(project.title)
+        }))
       };
-    });
+    }));
 
-    return {
+    const result = {
       title: 'Bence - AI Engineer & Product Designer',
       description: 'Portfolio of Bence, AI engineer and product designer specializing in AI-first software for regulated markets',
       isHome: true,
       portfolioData: this.portfolioService.getPortfolioData(),
       projectCategories: categoriesWithFeaturedProjects,
+      // Search/filter data
+      categories: allCategories,
+      technologies: allTechnologies,
+      filteredProjects,
+      hasFilters,
+      query: searchQuery,
+      // Debug info
+      debugInfo: {
+        queryKeys: Object.keys(searchQuery),
+        hasFiltersType: typeof hasFilters,
+        hasFiltersValue: hasFilters,
+        querySearchValue: searchQuery.search,
+      }
     };
+    
+    console.log('Debug - Final result categories length:', result.categories.length);
+    console.log('Debug - Final result technologies length:', result.technologies.length);
+    console.log('Debug - hasFilters value:', result.hasFilters);
+    console.log('Debug - query object:', result.query);
+    console.log('Debug - All result keys:', Object.keys(result));
+    
+    return result;
   }
 
   private getShortTitle(title: string): string {
@@ -76,26 +134,80 @@ export class PortfolioController {
     };
   }
 
+
   // Generic category page handler
   @Get(':category-projects')
   @Render('categories/category')
-  getCategoryProjects(@Param('category') category: string) {
+  async getCategoryProjects(@Param('category') category: string, @Query() query: ProjectSearchQuery) {
     const categoryData = this.portfolioService.getCategoryData(category);
-    const projects = this.portfolioService.getProjectsByCategory(category)
+    
+    if (!categoryData) {
+      throw new Error(`Category ${category} not found`);
+    }
+
+    // Apply search filters within the category
+    const searchQuery = { ...query, category };
+    const projects = (await this.portfolioService.searchProjects(searchQuery))
       .map(project => ({
         ...project,
         shortTitle: this.getShortTitle(project.title)
       }));
-
-    if (!categoryData) {
-      throw new Error(`Category ${category} not found`);
-    }
 
     return {
       title: `${categoryData.name} - Bence Portfolio`,
       description: `Explore ${categoryData.name.toLowerCase()} projects by Bence`,
       category: categoryData,
       projects,
+    };
+  }
+
+  // API Endpoints
+  @Get('api/projects')
+  async getProjectsApi(@Query() query: ProjectSearchQuery) {
+    const projects = await this.portfolioService.searchProjects(query);
+    return {
+      projects,
+      total: projects.length,
+      query,
+    };
+  }
+
+  @Get('api/categories')
+  async getCategoriesApi() {
+    const categories = await this.portfolioService.getCategoriesWithCounts();
+    return {
+      categories,
+      total: categories.length,
+    };
+  }
+
+  @Get('api/search/technologies')
+  async getTechnologiesApi() {
+    const technologies = await this.portfolioService.getAllTechnologies();
+    return {
+      technologies,
+      total: technologies.length,
+    };
+  }
+
+  @Get('debug/template-data')
+  async getTemplateDebug() {
+    const allCategories = await this.portfolioService.getCategoriesWithCounts();
+    const allTechnologies = await this.portfolioService.getAllTechnologies();
+    return {
+      categoriesCount: allCategories.length,
+      technologiesCount: allTechnologies.length,
+      categories: allCategories,
+      technologies: allTechnologies.slice(0, 10)
+    };
+  }
+
+  @Get('test-query')
+  testQuery(@Query('search') search?: string, @Query('category') category?: string) {
+    return {
+      received_search: search || 'empty',
+      received_category: category || 'empty',
+      working: true
     };
   }
 }

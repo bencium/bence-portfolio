@@ -1,7 +1,11 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Render, Req, Res, HttpStatus, HttpException } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Render, Req, Res, HttpStatus, HttpException, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { AdminService } from './admin.service';
 import { ProjectData } from '../portfolio/portfolio.service';
 import { Request, Response } from 'express';
+import { diskStorage } from 'multer';
+import * as path from 'path';
+import * as fs from 'fs';
 
 @Controller('admin')
 export class AdminController {
@@ -118,5 +122,110 @@ export class AdminController {
       throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
     }
     return this.adminService.getCategories();
+  }
+
+  // Upload hero image for project (API)
+  @Post('api/projects/:id/upload-image')
+  @UseInterceptors(FileInterceptor('heroImage', { 
+    storage: diskStorage({
+      destination: (req, file, cb) => {
+        const uploadPath = path.join(process.cwd(), 'public', 'images', 'projects');
+        if (!fs.existsSync(uploadPath)) {
+          fs.mkdirSync(uploadPath, { recursive: true });
+        }
+        cb(null, uploadPath);
+      },
+      filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const ext = path.extname(file.originalname);
+        cb(null, `hero-${uniqueSuffix}${ext}`);
+      },
+    }),
+    fileFilter: (req, file, cb) => {
+      if (file.mimetype.match(/\/(jpg|jpeg|png|webp|avif)$/)) {
+        cb(null, true);
+      } else {
+        cb(new Error('Only image files are allowed!'), false);
+      }
+    },
+    limits: {
+      fileSize: 5 * 1024 * 1024, // 5MB limit
+    },
+  }))
+  async uploadHeroImage(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+    @Body() body: { heroImageAlt?: string },
+    @Req() req: Request
+  ) {
+    if (!req.session?.authenticated) {
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
+
+    if (!file) {
+      throw new HttpException('No file uploaded', HttpStatus.BAD_REQUEST);
+    }
+
+    try {
+      // Get the project first to potentially remove old image
+      const project = await this.adminService.getProjectById(id);
+      
+      // Remove old hero image if it exists
+      if (project.heroImage) {
+        const oldImagePath = path.join(process.cwd(), 'public', 'images', 'projects', project.heroImage);
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlinkSync(oldImagePath);
+        }
+      }
+
+      // Update project with new hero image
+      const relativePath = file.filename;
+      const updatedProject = await this.adminService.updateProject(id, {
+        heroImage: relativePath,
+        heroImageAlt: body.heroImageAlt || `${project.title} screenshot`
+      });
+
+      return {
+        success: true,
+        heroImage: relativePath,
+        heroImageAlt: updatedProject.heroImageAlt
+      };
+    } catch (error) {
+      // Clean up uploaded file if project update fails
+      if (fs.existsSync(file.path)) {
+        fs.unlinkSync(file.path);
+      }
+      throw new HttpException('Failed to upload image', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  // Remove hero image from project (API)
+  @Delete('api/projects/:id/image')
+  async removeHeroImage(@Param('id') id: string, @Req() req: Request) {
+    if (!req.session?.authenticated) {
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
+
+    try {
+      const project = await this.adminService.getProjectById(id);
+      
+      if (project.heroImage) {
+        // Remove file from filesystem
+        const imagePath = path.join(process.cwd(), 'public', 'images', 'projects', project.heroImage);
+        if (fs.existsSync(imagePath)) {
+          fs.unlinkSync(imagePath);
+        }
+
+        // Update project to remove image references
+        await this.adminService.updateProject(id, {
+          heroImage: undefined,
+          heroImageAlt: undefined
+        });
+      }
+
+      return { success: true };
+    } catch (error) {
+      throw new HttpException('Failed to remove image', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }

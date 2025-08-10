@@ -290,6 +290,23 @@
                                 <input type="checkbox" name="featured" /> Featured Project
                             </label>
                         </div>
+                        <div class="form-group full-width">
+                            <label>Hero Image</label>
+                            <input type="file" name="heroImage" class="form-input" accept="image/*" />
+                            <small>Supported formats: JPG, PNG, WebP, AVIF. Max size: 5MB</small>
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Hero Image Alt Text</label>
+                            <input type="text" name="heroImageAlt" class="form-input" placeholder="Describe the image for accessibility" />
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Project Link (optional)</label>
+                            <input type="url" name="link" class="form-input" placeholder="https://example.com" />
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Second Link (optional)</label>
+                            <input type="url" name="secondLink" class="form-input" placeholder="https://github.com/project" />
+                        </div>
                     </div>
                     <div style="margin-top: var(--space-lg); display: flex; gap: var(--space-md);">
                         <button type="submit" class="btn">Add Project</button>
@@ -341,6 +358,29 @@
                             <label>
                                 <input type="checkbox" id="edit-featured" name="featured" /> Featured Project
                             </label>
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Hero Image</label>
+                            <div id="current-hero-image" style="margin-bottom: 10px; display: none;">
+                                <img id="hero-preview" src="" alt="" style="max-width: 200px; max-height: 150px; object-fit: cover; border: 1px solid var(--warm-gray);" />
+                                <div style="margin-top: 5px;">
+                                    <button type="button" class="btn btn-danger" onclick="removeHeroImage()">Remove Image</button>
+                                </div>
+                            </div>
+                            <input type="file" id="edit-heroImage" name="heroImage" class="form-input" accept="image/*" />
+                            <small>Supported formats: JPG, PNG, WebP, AVIF. Max size: 5MB</small>
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Hero Image Alt Text</label>
+                            <input type="text" id="edit-heroImageAlt" name="heroImageAlt" class="form-input" placeholder="Describe the image for accessibility" />
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Project Link (optional)</label>
+                            <input type="url" id="edit-link" name="link" class="form-input" placeholder="https://example.com" />
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Second Link (optional)</label>
+                            <input type="url" id="edit-secondLink" name="secondLink" class="form-input" placeholder="https://github.com/project" />
                         </div>
                     </div>
                     <div style="margin-top: var(--space-lg); display: flex; gap: var(--space-md);">
@@ -415,7 +455,10 @@
                 description: formData.get('description'),
                 category: formData.get('category'),
                 featured: formData.has('featured'),
-                technologies: formData.get('technologies').split(',').map(t => t.trim()).filter(t => t)
+                technologies: formData.get('technologies').split(',').map(t => t.trim()).filter(t => t),
+                heroImageAlt: formData.get('heroImageAlt'),
+                link: formData.get('link') || undefined,
+                secondLink: formData.get('secondLink') || undefined
             };
 
             try {
@@ -426,6 +469,14 @@
                 });
 
                 if (response.ok) {
+                    const createdProject = await response.json();
+                    
+                    // If there's a hero image file, upload it
+                    const heroImageFile = formData.get('heroImage');
+                    if (heroImageFile && heroImageFile.size > 0) {
+                        await uploadHeroImage(createdProject.id, heroImageFile, projectData.heroImageAlt);
+                    }
+
                     alert('Project added successfully!');
                     form.reset();
                     toggleForm('add-form');
@@ -477,6 +528,18 @@
                 document.getElementById('edit-category').value = project.category;
                 document.getElementById('edit-technologies').value = project.technologies.join(', ');
                 document.getElementById('edit-featured').checked = project.featured;
+                document.getElementById('edit-heroImageAlt').value = project.heroImageAlt || '';
+                document.getElementById('edit-link').value = project.link || '';
+                document.getElementById('edit-secondLink').value = project.secondLink || '';
+                
+                // Show current hero image if it exists
+                if (project.heroImage) {
+                    document.getElementById('hero-preview').src = `/images/projects/${project.heroImage}`;
+                    document.getElementById('hero-preview').alt = project.heroImageAlt || project.title;
+                    document.getElementById('current-hero-image').style.display = 'block';
+                } else {
+                    document.getElementById('current-hero-image').style.display = 'none';
+                }
                 
                 // Show the edit form
                 showEditForm();
@@ -517,7 +580,10 @@
                 description: formData.get('description'),
                 category: formData.get('category'),
                 featured: formData.has('featured'),
-                technologies: formData.get('technologies').split(',').map(t => t.trim()).filter(t => t)
+                technologies: formData.get('technologies').split(',').map(t => t.trim()).filter(t => t),
+                heroImageAlt: formData.get('heroImageAlt'),
+                link: formData.get('link') || undefined,
+                secondLink: formData.get('secondLink') || undefined
             };
 
             try {
@@ -528,6 +594,12 @@
                 });
 
                 if (response.ok) {
+                    // If there's a new hero image file, upload it
+                    const heroImageFile = formData.get('heroImage');
+                    if (heroImageFile && heroImageFile.size > 0) {
+                        await uploadHeroImage(projectId, heroImageFile, projectData.heroImageAlt);
+                    }
+
                     alert('Project updated successfully!');
                     hideEditForm();
                     refreshProjects();
@@ -537,6 +609,48 @@
                 }
             } catch (error) {
                 alert('Error updating project: ' + error.message);
+            }
+        }
+
+        // Helper function to upload hero image
+        async function uploadHeroImage(projectId, file, altText) {
+            const uploadFormData = new FormData();
+            uploadFormData.append('heroImage', file);
+            if (altText) {
+                uploadFormData.append('heroImageAlt', altText);
+            }
+
+            const response = await fetch(`/admin/api/projects/${projectId}/upload-image`, {
+                method: 'POST',
+                body: uploadFormData
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to upload hero image');
+            }
+        }
+
+        // Function to remove hero image
+        async function removeHeroImage() {
+            const projectId = document.getElementById('edit-project-id').value;
+            if (!projectId) return;
+
+            if (!confirm('Are you sure you want to remove this image?')) return;
+
+            try {
+                const response = await fetch(`/admin/api/projects/${projectId}/image`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    document.getElementById('current-hero-image').style.display = 'none';
+                    document.getElementById('edit-heroImageAlt').value = '';
+                    alert('Image removed successfully!');
+                } else {
+                    alert('Error removing image');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
             }
         }
 

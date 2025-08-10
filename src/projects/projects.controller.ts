@@ -7,17 +7,21 @@ export class ProjectsController {
 
   @Get(':id')
   @Render('projects/project')
-  getProject(@Param('id') id: string) {
-    const project = this.portfolioService.getProjectById(id);
+  async getProject(@Param('id') id: string) {
+    const project = await this.portfolioService.getProjectById(id);
     
     if (!project) {
       throw new NotFoundException(`Project with id ${id} not found`);
     }
 
+    // Get related projects from the same category
+    const relatedProjects = await this.portfolioService.getRelatedProjects(id, 4);
+
     return {
       title: `${project.title} - Bence Portfolio`,
       description: project.description,
       project,
+      relatedProjects,
     };
   }
 }

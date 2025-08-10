@@ -11,33 +11,57 @@
     </article>
 
     <section class="project-screenshot">
-        <div>Project Screenshot</div>
+        {{#if project.heroImage}}
+        <img src="/images/projects/{{project.heroImage}}" alt="{{project.heroImageAlt}}" class="hero-image" />
+        {{else}}
+        <div class="hero-placeholder">Project Screenshot</div>
+        {{/if}}
     </section>
 
-    <section class="tech-stack">
+    {{#if project.link}}
+    <section class="project-links">
+        <h3>Project Links</h3>
+        <div class="links-container">
+            <a href="{{project.link}}" target="_blank" rel="noopener noreferrer" class="project-link">
+                {{project.link}}
+            </a>
+            {{#if project.secondLink}}
+            <a href="{{project.secondLink}}" target="_blank" rel="noopener noreferrer" class="project-link">
+                {{project.secondLink}}
+            </a>
+            {{/if}}
+        </div>
+    </section>
+    {{else}}
+    {{#if project.secondLink}}
+    <section class="project-links">
+        <h3>Project Links</h3>
+        <div class="links-container">
+            <a href="{{project.secondLink}}" target="_blank" rel="noopener noreferrer" class="project-link">
+                {{project.secondLink}}
+            </a>
+        </div>
+    </section>
+    {{/if}}
+    {{/if}}
+
+    <section class="tech-section">
         <h3>Technology Stack</h3>
-        <div class="tech-list">
+        <div class="tech-stack">
             {{#each project.technologies}}
-            <span class="tech-item">{{this}}</span>
+            <span class="tech-tag">{{this}}</span>
             {{/each}}
         </div>
     </section>
 
-    <section class="project-details">
-        <h3>Project Details</h3>
-        <p>This is a {{project.category}} project that demonstrates advanced capabilities in {{project.technologies.[0]}} and related technologies.</p>
-        
-        {{#if project.featured}}
-        <p><strong>Featured Project:</strong> This project is highlighted as one of the key examples in the {{project.category}} category.</p>
-        {{/if}}
-        
-        {{#if project.link}}
-        <p><a href="{{project.link}}" target="_blank" rel="noopener noreferrer">View Live Project</a></p>
-        {{/if}}
-    </section>
-
+    {{#if relatedProjects}}
     <section class="related-projects">
         <h3>Related Projects</h3>
-        <p>Explore more projects in the <a href="/{{project.category}}-projects">{{project.category}} category</a>.</p>
+        <ul class="related-list">
+            {{#each relatedProjects}}
+            <li><a href="/projects/{{id}}">{{title}}</a></li>
+            {{/each}}
+        </ul>
     </section>
+    {{/if}}
 </div>

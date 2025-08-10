@@ -27,7 +27,19 @@
       "Bash(open:*)",
       "Bash(git init:*)",
       "Bash(git branch:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(flyctl status:*)",
+      "Bash(flyctl apps:*)",
+      "Bash(flyctl deploy:*)",
+      "Bash(python:*)",
+      "Bash(lsof:*)",
+      "Bash(node:*)",
+      "Bash(npm install:*)",
+      "Bash(rm:*)",
+      "Bash(git push:*)",
+      "Bash(npm run typecheck:*)",
+      "Bash(flyctl logs:*)"
     ],
     "deny": []
   }
