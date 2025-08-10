@@ -8,16 +8,22 @@
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
+    <!-- Floating particles -->
+    <div class="particle" style="top: 20%; left: 10%; color: var(--accent); font-size: 8px;">●</div>
+    <div class="particle" style="top: 60%; left: 80%; color: var(--secondary); font-size: 12px; animation-delay: 5s;">●</div>
+    <div class="particle" style="top: 80%; left: 20%; color: var(--accent); font-size: 10px; animation-delay: 10s;">●</div>
+    <div class="particle" style="top: 40%; left: 90%; color: var(--text-dim); font-size: 6px; animation-delay: 15s;">●</div>
+    <div class="particle" style="top: 70%; left: 5%; color: var(--secondary); font-size: 8px; animation-delay: 8s;">●</div>
     <header class="header">
         <div class="container">
             <div class="header-content">
                 <div class="logo">
-                    <a href="/">Bence</a>
+                    <a href="/">BC</a>
                 </div>
                 <nav class="nav">
                     <ul>
-                        <li><a href="/" class="{{#if isHome}}active{{/if}}">Home</a></li>
-                        <li><a href="/#portfolio" class="{{#if isPortfolio}}active{{/if}}">Portfolio</a></li>
+                        <li><a href="/" class="{{#if isHome}}active{{/if}}">Systems</a></li>
+                        <li><a href="/#portfolio" class="{{#if isPortfolio}}active{{/if}}">Projects</a></li>
                         <li><a href="/about" class="{{#if isAbout}}active{{/if}}">About</a></li>
                         <li><a href="/about#contact">Contact</a></li>
                     </ul>
@@ -33,7 +39,7 @@
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
-                <p>&copy; 2024 Bence. AI Engineer & Product Designer.</p>
+                <p>&copy; 2024 Bence. Building autonomous systems, one agent at a time.</p>
             </div>
         </div>
     </footer>
@@ -84,7 +90,145 @@
                 
                 observer.observe(portfolioSection);
             }
+
+            // Search and Filter functionality
+            const searchInput = document.getElementById('searchInput');
+            const categoryFilter = document.getElementById('categoryFilter');
+            const techFilter = document.getElementById('techFilter');
+            const clearButton = document.getElementById('clearSearch');
+            const resultsCount = document.getElementById('resultsCount');
+
+            if (searchInput || categoryFilter || techFilter) {
+                // Set initial values from URL parameters
+                const urlParams = new URLSearchParams(window.location.search);
+                if (searchInput && urlParams.get('search')) {
+                    searchInput.value = urlParams.get('search');
+                }
+                if (categoryFilter && urlParams.get('category')) {
+                    categoryFilter.value = urlParams.get('category');
+                }
+                if (techFilter && urlParams.get('tech')) {
+                    techFilter.value = urlParams.get('tech');
+                }
+                function updateURL() {
+                    const params = new URLSearchParams();
+                    
+                    if (searchInput && searchInput.value) {
+                        params.set('search', searchInput.value);
+                    }
+                    if (categoryFilter && categoryFilter.value) {
+                        params.set('category', categoryFilter.value);
+                    }
+                    if (techFilter && techFilter.value) {
+                        params.set('tech', techFilter.value);
+                    }
+                    
+                    const newURL = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+                    window.history.pushState({}, '', newURL);
+                    
+                    // Reload page with new filters
+                    window.location.reload();
+                }
+
+                if (searchInput) {
+                    let searchTimeout;
+                    searchInput.addEventListener('input', function() {
+                        clearTimeout(searchTimeout);
+                        searchTimeout = setTimeout(updateURL, 500); // Debounce search
+                    });
+                }
+
+                if (categoryFilter) {
+                    categoryFilter.addEventListener('change', updateURL);
+                }
+
+                if (techFilter) {
+                    techFilter.addEventListener('change', updateURL);
+                }
+
+                if (clearButton) {
+                    clearButton.addEventListener('click', function() {
+                        if (searchInput) searchInput.value = '';
+                        if (categoryFilter) categoryFilter.value = '';
+                        if (techFilter) techFilter.value = '';
+                        window.location.href = window.location.pathname;
+                    });
+                }
+            }
         });
+
+        // Terminal line-by-line animation - only on main site, not admin
+        const terminalLines = document.querySelectorAll('.typing-line');
+        const isAdminPage = window.location.pathname.startsWith('/admin');
+        if (terminalLines.length > 0 && !isAdminPage) {
+            function startTerminalAnimation() {
+                // Reset all lines
+                terminalLines.forEach((line, index) => {
+                    line.classList.remove('visible', 'typing');
+                });
+
+                // Animate lines one by one
+                terminalLines.forEach((line, index) => {
+                    setTimeout(() => {
+                        line.classList.add('visible');
+                        if (index === terminalLines.length - 1) {
+                            // Add blinking cursor to last line
+                            line.classList.add('typing');
+                            // Remove cursor after 2 seconds
+                            setTimeout(() => {
+                                line.classList.remove('typing');
+                            }, 2000);
+                        }
+                    }, index * 800); // 800ms delay between lines
+                });
+            }
+
+            // Start animation on page load
+            startTerminalAnimation();
+            
+            // Cycle through different command sets
+            const commandSets = [
+                [
+                    '$ agent.initialize()',
+                    '> Loading cognitive modules...',
+                    '> Establishing tool connections...',
+                    '> Self-reflection loop: ACTIVE',
+                    '> Agent ready for autonomous operation ✓'
+                ],
+                [
+                    '$ agent.analyze_context()',
+                    '> Pattern recognition: ENHANCED',
+                    '> Memory consolidation: COMPLETE',
+                    '> Ready for next task...'
+                ],
+                [
+                    '$ system.optimize()',
+                    '> Multi-agent coordination: ACTIVE',
+                    '> Performance metrics: TRACKING',
+                    '> Continuous improvement: ENABLED'
+                ],
+                [
+                    '$ deploy.production()',
+                    '> Health checks: PASSING',
+                    '> Load balancing: OPTIMIZED',
+                    '> System status: OPERATIONAL ✓'
+                ]
+            ];
+
+            let currentSet = 0;
+            setInterval(() => {
+                currentSet = (currentSet + 1) % commandSets.length;
+                const commands = commandSets[currentSet];
+                
+                // Update line text
+                terminalLines.forEach((line, index) => {
+                    line.textContent = commands[index] || '';
+                    line.style.display = commands[index] ? 'block' : 'none';
+                });
+                
+                startTerminalAnimation();
+            }, 8000); // Change command set every 8 seconds
+        }
     </script>
 </body>
 </html>

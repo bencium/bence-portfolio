@@ -1,63 +1,97 @@
 <div class="container">
     <section class="hero">
-        <h1>{{portfolioData.title}}</h1>
-        <p class="project-intro">
-            {{portfolioData.description}}
-        </p>
-
-        <!-- Service Offerings Table -->
-        <div class="service-offerings">
-            <table class="offerings-table">
-                <thead>
-                    <tr>
-                        <th>Service</th>
-                        <th>What we remove</th>
-                        <th>What you get (in &lt; 30 days)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><strong>1. MVP Brand & Product/Service Strategy</strong></td>
-                        <td>Endless workshops, design-by-committee</td>
-                        <td><strong>A market-tested MVP:</strong> name, brand system, value prop, and go-to-market plan shaped by real-time user data</td>
-                    </tr>
-                    <tr>
-                        <td><strong>2. Business Consultancy</strong></td>
-                        <td>Siloed roadmaps & slide decks</td>
-                        <td><strong>An execution playbook:</strong> prioritised growth levers, AI-driven benchmarks, and measurable KPIs that every stakeholder signs off in one sprint</td>
-                    </tr>
-                    <tr>
-                        <td><strong>3. Software & App Development</strong></td>
-                        <td>Friction between brief → dev → QA</td>
-                        <td><strong>Agentic micro-apps:</strong> production-ready code generated, tested, and deployed by autonomous AI workflows (with human oversight only where judgment adds value)</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Why it works section -->
-        <div class="why-it-works">
-            <h2>Why it works</h2>
-            <div class="advantages">
-                <div class="advantage-item">
-                    <h4>Negative-space advantage</h4>
-                    <p>We design around what isn't needed, slashing coordination latency.</p>
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1>We build <span class="accent-text">agentic apps</span> in the open</h1>
+                <p>Transparent development, measurable progress, zero marketing fluff. We combine design clarity with engineering discipline—no tool sprawl, just focused systems that ship fast and iterate continuously.</p>
+                <p>Architecture over feature lists. Skip the bloated enterprise software and one-size-fits-all SaaS solutions. These are purpose-built agentic rapid applications.</p>
+                <p class="micro-philosophy">Map the value, make it observable, keep it simple, ship weekly.</p>
+                <div class="cta-buttons">
+                    <a href="#agents" class="btn btn-primary">
+                        View Agent Systems →
+                    </a>
+                    <a href="#contact" class="btn btn-secondary">
+                        Let's Collaborate
+                    </a>
                 </div>
-                <div class="advantage-item">
-                    <h4>Algorithmic governance</h4>
-                    <p>Agents read live demand signals and trigger micro-batches of product, content, or code. Winners scale; flops vanish.</p>
+            </div>
+            <div class="terminal">
+                <div class="terminal-header">
+                    <div class="terminal-dot dot-red"></div>
+                    <div class="terminal-dot dot-yellow"></div>
+                    <div class="terminal-dot dot-green"></div>
                 </div>
-                <div class="advantage-item">
-                    <h4>Supplier-grade cadence</h4>
-                    <p>Weekly deploys for software, weekly growth loops for you.</p>
+                <div class="terminal-content">
+                    <div class="typing-line">$ agent.initialize()</div>
+                    <div class="typing-line">> Loading cognitive modules...</div>
+                    <div class="typing-line">> Establishing tool connections...</div>
+                    <div class="typing-line">> Self-reflection loop: ACTIVE</div>
+                    <div class="typing-line">> Agent ready for autonomous operation ✓</div>
                 </div>
             </div>
         </div>
+    </section>
 
-        <!-- Call to Action -->
-        <div class="cta-section">
-            <h3>Ready?</h3>
-            <a href="/about#contact" class="cta-button">👉 Book a 15-min AI-Potential Call</a>
+    <section id="agents" class="section">
+        <div class="container">
+            <h2 class="section-title">Production <span class="accent-text">Agent Systems</span></h2>
+            
+            <div class="agent-grid">
+                <div class="agent-card">
+                    <div class="agent-icon">🧠</div>
+                    <h3>Code Generation Agent</h3>
+                    <p>Self-improving system that writes, tests, and refactors code autonomously. Handles complex multi-file projects with 94% accuracy.</p>
+                    <div class="tech-stack">
+                        <span class="tech-tag">GPT-4</span>
+                        <span class="tech-tag">LangChain</span>
+                        <span class="tech-tag">AST Parser</span>
+                        <span class="tech-tag">Docker</span>
+                    </div>
+                </div>
+
+                <div class="agent-card">
+                    <div class="agent-icon">🔄</div>
+                    <h3>Multi-Agent Orchestrator</h3>
+                    <p>Coordinates specialized agents for complex workflows. Dynamic task decomposition with inter-agent communication protocols.</p>
+                    <div class="tech-stack">
+                        <span class="tech-tag">AutoGen</span>
+                        <span class="tech-tag">Redis</span>
+                        <span class="tech-tag">gRPC</span>
+                        <span class="tech-tag">Kubernetes</span>
+                    </div>
+                </div>
+
+                <div class="agent-card">
+                    <div class="agent-icon">📊</div>
+                    <h3>Research Assistant</h3>
+                    <p>Autonomous research agent with web scraping, paper analysis, and synthesis capabilities. Generates comprehensive reports.</p>
+                    <div class="tech-stack">
+                        <span class="tech-tag">Claude-3</span>
+                        <span class="tech-tag">RAG Pipeline</span>
+                        <span class="tech-tag">Pinecone</span>
+                        <span class="tech-tag">Arxiv API</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="metrics">
+                <div class="metric-card">
+                    <div class="metric-value">12M+</div>
+                    <div class="metric-label">Agent Interactions</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">98%</div>
+                    <div class="metric-label">Task Success Rate</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">47</div>
+                    <div class="metric-label">Production Agents</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">3.2s</div>
+                    <div class="metric-label">Avg Response Time</div>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -67,36 +101,105 @@
         <!-- Portfolio Summary -->
         <div class="portfolio-intro">
             <p class="portfolio-summary">
-                <strong>{{portfolioData.stats.totalProjects}}+ AI-first projects</strong> across 8 specialized categories, demonstrating comprehensive expertise from healthcare systems 
-                serving real patients to cutting-edge AGI research tools. <strong>2+ years of development</strong> with measurable impact across 
-                healthcare, automation, and business intelligence sectors.
+                <strong>{{portfolioData.stats.totalProjects}}+ autonomous systems</strong> across 8 specialized domains, showcasing advanced agentic architectures from 
+                medical AI serving real patients to self-improving research agents. <strong>2+ years pioneering</strong> multi-agent coordination, 
+                LLM orchestration, and production-ready intelligent automation.
             </p>
             
-            <div class="portfolio-stats">
-                <div class="stat-item">
-                    <span class="stat-number">🏥 {{portfolioData.stats.healthcare}}</span>
-                    <span class="stat-label">Healthcare Projects</span>
+        </div>
+
+        <!-- Search and Filter Interface -->
+        <div class="search-filter-section">
+            <div class="search-controls">
+                <div class="search-input-group">
+                    <input type="text" id="searchInput" placeholder="Search projects..." value="{{query.search}}" />
+                    <button type="button" id="clearSearch" class="clear-btn">Clear</button>
                 </div>
-                <div class="stat-item">
-                    <span class="stat-number">🤖 {{portfolioData.stats.automation}}</span>
-                    <span class="stat-label">AI Automation</span>
+                
+                <div class="filter-controls">
+                    <div class="filter-group">
+                        <label for="categoryFilter">Category:</label>
+                        <select id="categoryFilter">
+                            <option value="">All Categories</option>
+                            <option value="healthcare">AI Healthcare & Medical Applications (3)</option>
+                            <option value="research">AI Research & Detection Tools (2)</option>
+                            <option value="automation">AI Agents & Automation (3)</option>
+                            <option value="webapp">Web Applications & PWAs (2)</option>
+                            <option value="business">Client Work & Business Applications (2)</option>
+                            <option value="tools">Development Tools & Utilities (2)</option>
+                            <option value="analytics">Data Processing & Analytics (2)</option>
+                            <option value="design">UI/Design & Animation Projects (2)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="techFilter">Technology:</label>
+                        <select id="techFilter">
+                            <option value="">All Technologies</option>
+                            <option value="AI Integration">AI Integration</option>
+                            <option value="Next.js">Next.js</option>
+                            <option value="React">React</option>
+                            <option value="TypeScript">TypeScript</option>
+                            <option value="Python">Python</option>
+                            <option value="PostgreSQL">PostgreSQL</option>
+                            <option value="OpenAI">OpenAI</option>
+                            <option value="GPT-4">GPT-4</option>
+                            <option value="Node.js">Node.js</option>
+                            <option value="Real-time">Real-time</option>
+                            <option value="PWA">PWA</option>
+                            <option value="RAG">RAG</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="stat-item">
-                    <span class="stat-number">🌐 {{portfolioData.stats.webapp}}</span>
-                    <span class="stat-label">Web Applications</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">💼 {{portfolioData.stats.business}}</span>
-                    <span class="stat-label">Client Projects</span>
-                </div>
+            </div>
+            
+            <div class="results-info">
+                {{#if hasFilters}}
+                <span id="resultsCount">{{filteredProjects.length}} projects found</span>
+                {{else}}
+                <span id="resultsCount">Browse all projects or use search to filter</span>
+                {{/if}}
+                <!-- Debug: hasFilters={{hasFilters}}, query={{query}}, search={{query.search}} -->
+                <!-- All vars: isHome={{isHome}}, title={{title}} -->
+                <!-- DebugInfo: hasFiltersType={{debugInfo.hasFiltersType}}, hasFiltersValue={{debugInfo.hasFiltersValue}}, querySearchValue={{debugInfo.querySearchValue}} -->
             </div>
         </div>
         
+        {{#if hasFilters}}
+        <!-- Filtered Results -->
+        <div class="filtered-results">
+            <div class="projects-grid">
+                {{#each filteredProjects}}
+                <article class="project-card" onclick="location.href='/projects/{{id}}'">
+                    <div class="project-icon {{category}}">
+                        <span>{{shortTitle}}</span>
+                    </div>
+                    <div class="project-content">
+                        <h3 class="project-title">{{title}}</h3>
+                        <p class="project-description">{{description}}</p>
+                        <div class="tech-tags">
+                            {{#each technologies}}
+                            <span class="tech-tag">{{this}}</span>
+                            {{/each}}
+                        </div>
+                    </div>
+                </article>
+                {{/each}}
+            </div>
+            
+            {{#unless filteredProjects.length}}
+            <div class="no-projects">
+                <p>No projects found matching your search criteria. Try adjusting your filters.</p>
+            </div>
+            {{/unless}}
+        </div>
+        {{else}}
+        <!-- Default Category View -->
         {{#each projectCategories}}
         <!-- {{name}} -->
         <div class="category-section">
             <div class="category-header">
-                <h3 class="category-title">{{icon}} {{name}}</h3>
+                <h3 class="category-title">{{name}}</h3>
                 <span class="project-count">{{count}} Projects</span>
             </div>
             <p class="category-description">
@@ -106,12 +209,17 @@
             <div class="featured-projects">
                 {{#each featuredProjects}}
                 <article class="project-card featured" onclick="location.href='/projects/{{id}}'">
-                    <div class="project-image {{category}}">
+                    <div class="project-icon {{category}}">
                         <span>{{shortTitle}}</span>
                     </div>
                     <div class="project-content">
                         <h4 class="project-title">{{title}}</h4>
                         <p class="project-description">{{description}}</p>
+                        <div class="tech-tags">
+                            {{#each technologies}}
+                            <span class="tech-tag">{{this}}</span>
+                            {{/each}}
+                        </div>
                     </div>
                 </article>
                 {{/each}}
@@ -122,6 +230,7 @@
             </div>
         </div>
         {{/each}}
+        {{/if}}
 
     </section>
 </div>

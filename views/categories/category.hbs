@@ -5,16 +5,54 @@
 
     <section class="category-page">
         <header class="category-header">
-            <h1>{{category.icon}} {{category.name}}</h1>
+            <h1>{{category.name}}</h1>
             <p class="category-intro">
                 {{category.description}}
             </p>
         </header>
 
+        {{#if isProjects}}
+        <!-- Search and Filter Interface -->
+        <div class="search-filter-section">
+            <div class="search-controls">
+                <div class="search-input-group">
+                    <input type="text" id="searchInput" placeholder="Search projects..." value="{{query.search}}" />
+                    <button type="button" id="clearSearch" class="clear-btn">Clear</button>
+                </div>
+                
+                <div class="filter-controls">
+                    <div class="filter-group">
+                        <label for="categoryFilter">Category:</label>
+                        <select id="categoryFilter">
+                            <option value="">All Categories</option>
+                            {{#each categories}}
+                            <option value="{{id}}">{{name}} ({{projectCount}})</option>
+                            {{/each}}
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="techFilter">Technology:</label>
+                        <select id="techFilter">
+                            <option value="">All Technologies</option>
+                            {{#each technologies}}
+                            <option value="{{this}}">{{this}}</option>
+                            {{/each}}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="results-info">
+                <span id="resultsCount">{{projects.length}} projects found</span>
+            </div>
+        </div>
+        {{/if}}
+
         <div class="projects-grid">
             {{#each projects}}
             <article class="project-card" onclick="location.href='/projects/{{id}}'">
-                <div class="project-image {{category}}">
+                <div class="project-icon {{category}}">
                     <span>{{shortTitle}}</span>
                 </div>
                 <div class="project-content">

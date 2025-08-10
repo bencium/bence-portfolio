@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Portfolio</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        /* Admin Light Theme Override */
+        :root {
+            --primary: #ffffff;
+            --bg-card: #f8fafc;
+            --border: #e2e8f0;
+            --text: #1a202c;
+            --text-dim: #4a5568;
+            --bg-secondary: #f7fafc;
+            --accent: #3182ce;
+            --secondary: #805ad5;
+            --warm-gray: #e2e8f0;
+            --warm-gray-light: #f1f5f9;
+            --cream-bg: #ffffff;
+            --text-primary: #1a202c;
+            --accent-orange: #3182ce;
+            --text-secondary: #4a5568;
+        }
+        
+        body {
+            background: #f7fafc;
+            color: #1a202c;
+        }
+        .login-container {
+            max-width: 400px;
+            margin: 10vh auto;
+            padding: var(--space-2xl);
+            background: var(--warm-gray-light);
+            border-radius: 8px;
+        }
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-lg);
+        }
+        .login-input {
+            padding: var(--space-md);
+            border: 2px solid var(--warm-gray);
+            background: var(--cream-bg);
+            color: var(--text-primary);
+            font-size: var(--font-size-base);
+        }
+        .login-input:focus {
+            outline: none;
+            border-color: var(--accent-orange);
+        }
+        .login-button {
+            padding: var(--space-md) var(--space-lg);
+            background: var(--accent-orange);
+            color: white;
+            border: none;
+            font-size: var(--font-size-base);
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .login-button:hover {
+            background: #c44422;
+        }
+        .error-message {
+            color: #dc2626;
+            font-size: var(--font-size-sm);
+            margin-top: var(--space-sm);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="login-container">
+            <h1>Admin Login</h1>
+            <p>Enter password to access admin dashboard</p>
+            
+            {{#if error}}
+            <div class="error-message">{{error}}</div>
+            {{/if}}
+            
+            <form method="POST" action="/admin/login" class="login-form">
+                <input 
+                    type="password" 
+                    name="password" 
+                    placeholder="Admin Password"
+                    class="login-input"
+                    required
+                    autofocus
+                />
+                <button type="submit" class="login-button">
+                    Login
+                </button>
+            </form>
+            
+            <div style="margin-top: var(--space-xl); font-size: var(--font-size-sm); color: var(--text-secondary);">
+                <p><strong>Default password:</strong> admin123</p>
+                <p>Change ADMIN_PASSWORD environment variable in production</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
