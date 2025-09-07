@@ -41,9 +41,11 @@ export class AdminController {
   // Handle login
   @Post('login')
   async login(@Body() body: { password: string }, @Req() req: Request, @Res() res: Response) {
-    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123'; // Change in production!
+    if (!process.env.ADMIN_PASSWORD) {
+      throw new HttpException('Admin password not configured', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
     
-    if (body.password === adminPassword) {
+    if (body.password === process.env.ADMIN_PASSWORD) {
       req.session.authenticated = true;
       return res.redirect('/admin');
     }
